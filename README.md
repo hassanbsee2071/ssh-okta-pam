@@ -72,7 +72,7 @@ First, clone the repository to the server:
 
 ```bash
 git clone https://github.com/hassanbsee2071/ssh-okta-pam.git
-cd okta-ssh-oauth
+cd ssh-okta-pam
 ```
 
 #### 2. SSH Server Configuration
