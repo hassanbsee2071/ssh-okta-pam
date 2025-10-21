@@ -26,7 +26,7 @@ Execute the following command to download and install the SSO login script. When
 
 ```bash
 sudo curl -sL \
-  https://raw.githubusercontent.com/hassanbsee2071/okta-ssh-oauth/main/end-user-script/sso-login.sh \
+  https://raw.githubusercontent.com/hassanbsee2071/ssh-okta-pam/main/end-user-script/sso-login.sh \
   -o /usr/local/bin/sso-login && bash sso-login && sudo chmod +x /usr/local/bin/sso-login
 ```
 
@@ -71,7 +71,7 @@ After executing the `sso-login` command, the authentication process will begin:
 First, clone the repository to the server:
 
 ```bash
-git clone https://github.com/hassanbsee2071/okta-ssh-oauth.git
+git clone https://github.com/hassanbsee2071/ssh-okta-pam.git
 cd okta-ssh-oauth
 ```
 
@@ -133,7 +133,7 @@ ssh user@server-ip
 or 
 
 sudo curl -sL \
-  https://raw.githubusercontent.com/hassanbsee2071/okta-ssh-oauth/main/end-user-script/sso-login.sh \
+  https://raw.githubusercontent.com/hassanbsee2071/ssh-okta-pam/main/end-user-script/sso-login.sh \
   -o /usr/local/bin/sso-login && bash sso-login && sudo chmod +x /usr/local/bin/sso-login
 ```
 
