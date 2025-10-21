@@ -89,7 +89,6 @@ This is a PAM (Pluggable Authentication Modules) based Single Sign-On (SSO) solu
 - **Purpose**: Implements OAuth2 Device Flow authentication
 - **Key Features**:
   - Initiates device authorization with Okta
-  - Generates QR code for mobile authentication
   - Polls for token completion
   - Parses JWT tokens to extract user information
   - Stores tokens in `/tmp/{username}` for user creation
@@ -104,11 +103,11 @@ This is a PAM (Pluggable Authentication Modules) based Single Sign-On (SSO) solu
   - Handles sudo group assignment based on Okta groups
 
 #### Cleanup Script (`users-clean-up.sh`)
-- **Purpose**: Removes inactive users
+- **Purpose**: Removes  users after 12 hours
 - **Key Features**:
-  - Identifies non-system users
-  - Removes users not in sudo group
-  - Cleans up home directories
+
+  - Removes users.
+
 
 ## Authentication Flow
 
@@ -151,43 +150,3 @@ This is a PAM (Pluggable Authentication Modules) based Single Sign-On (SSO) solu
 - Strict domain validation (syed.com only)
 - Case-insensitive username extraction
 - Persistent email storage for reuse
-
-## Integration Points
-
-### Okta Configuration
-- **Client ID**: `zzxxcccwweerrtttt`
-- **Authorization URL**: `https://sso.syed.com/oauth2/v1/device/authorize`
-- **Token URL**: `https://sso.syed.com/oauth2/v1/token`
-- **Scopes**: `openid profile offline_access groups`
-
-### System Dependencies
-- **Curl**: HTTP requests to Okta
-- **OpenSSL**: JWT token decoding
-- **jq**: JSON parsing
-- **PAM**: Authentication framework
-- **SSH**: Remote access protocol
-
-## File Structure
-```
-pam-sso-login/
-├── end-user-script/
-│   └── sso-login.sh          # Client-side authentication script
-├── ssh-pam-module/
-│   ├── deviceflow.c          # Custom PAM module (C)
-│   ├── pam-okta-create-user.sh # User creation script
-│   └── users-clean-up.sh     # User cleanup script
-├── server-configurations/
-│   ├── sshd                  # PAM configuration
-│   └── sshd_config           # SSH server configuration
-└── images/
-    ├── generate-token.png    # GitHub token generation guide
-    └── okta.png             # Okta authentication guide
-```
-
-## Benefits
-
-1. **Single Sign-On**: Users authenticate once with Okta
-2. **Automatic User Provisioning**: Users created automatically on first login
-3. **Group-Based Access Control**: Sudo permissions based on Okta groups
-4. **Secure Token Handling**: JWT tokens with proper permissions
-5. **Centralized Management**: All authentication through Okta
