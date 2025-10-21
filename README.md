@@ -105,7 +105,7 @@ sudo chmod +x /usr/local/bin/users-clean-up.sh
 
 #### 5. Compile and Install PAM Module
 
-Compile the custom PAM module from source:
+Compile the custom PAM module from source: Remember to change your OKTA configuration inside `deviceflow.c`
 
 ```bash
 cd ssh-pam-module
