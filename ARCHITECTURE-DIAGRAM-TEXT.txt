@@ -1,0 +1,205 @@
+PAM SSO LOGIN - COMPLETE ARCHITECTURE DIAGRAM
+================================================
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                                    USER LAYER                                  │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────────────────┐ │
+│  │   End User      │    │  sso-login.sh    │    │     Web Browser            │ │
+│  │                 │    │                  │    │                             │ │
+│  │ • Runs command  │───▶│ • Email validation│───▶│ • Opens Okta URL           │ │
+│  │ • Enters email  │    │ • Stores in ~/.sso│   │ • User authenticates       │ │
+│  │ • Gets password │    │ • SSH connection │   │ • Returns to terminal      │ │
+│  │ • Uses SSH      │    │ • Browser launch │   │                             │ │
+│  └─────────────────┘    └──────────────────┘    └─────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────────────────────┘
+                                        │
+                                        │ SSH Connection
+                                        ▼
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                                  SERVER LAYER                                  │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────────────────┐ │
+│  │   SSH Server    │    │   PAM Stack      │    │   Okta OAuth2 Service      │ │
+│  │                 │    │                  │    │                             │ │
+│  │ • Receives SSH  │───▶│ • deviceflow.so  │───▶│ • Device Authorization    │ │
+│  │   connection    │    │ • pam_unix.so    │    │ • Token Exchange           │ │
+│  │ • Uses PAM      │    │ • pam_exec.so    │    │ • JWT Token Generation     │ │
+│  │   for auth      │    │                  │    │ • Group Information        │ │
+│  └─────────────────┘    └──────────────────┘    └─────────────────────────────┘ │
+│                                        │                                        │
+│                                        ▼                                        │
+│  ┌─────────────────────────────────────────────────────────────────────────────┐ │
+│  │                    AUTHENTICATION & USER MANAGEMENT                        │ │
+│  │                                                                             │ │
+│  │  ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────────────┐ │ │
+│  │  │ JWT Processing  │    │ User Creation    │    │   Password Management   │ │ │
+│  │  │                 │    │                  │    │                         │ │ │
+│  │  │ • Token decode  │───▶│ • pam-okta-      │───▶│ • Generate temp password│ │ │
+│  │  │ • Email extract │    │   create-user.sh │    │ • Store in password.txt │ │ │
+│  │  │ • Group check   │    │ • Create account │    │ • Set secure permissions│ │ │
+│  │  │ • Store in /tmp │    │ • Assign sudo    │    │ • Display to user       │ │ │
+│  │  └─────────────────┘    └──────────────────┘    └─────────────────────────┘ │ │
+│  └─────────────────────────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────────────────────┘
+                                        │
+                                        ▼
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                                CLEANUP LAYER                                   │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                 │
+│  ┌─────────────────────────────────────────────────────────────────────────────┐ │
+│  │                        users-clean-up.sh                                   │ │
+│  │                                                                             │ │
+│  │ • Identify non-sudo users                                                  │ │
+│  │ • Remove inactive users                                                    │ │
+│  │ • Clean home directories                                                    │ │
+│  │ • Maintain system security                                                 │ │
+│  └─────────────────────────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+DETAILED FLOW SEQUENCE
+======================
+
+1. USER INITIATION
+   ┌─────────────┐
+   │ User runs   │
+   │ sso-login   │
+   └─────┬───────┘
+         │
+         ▼
+   ┌─────────────┐
+   │ Email       │
+   │ Validation  │
+   └─────┬───────┘
+         │
+         ▼
+   ┌─────────────┐
+   │ Store in    │
+   │ ~/.sso/     │
+   └─────┬───────┘
+
+2. SSH CONNECTION
+   ┌─────────────┐
+   │ Connect to  │
+   │ 10.218.115.91│
+   └─────┬───────┘
+         │
+         ▼
+   ┌─────────────┐
+   │ Execute     │
+   │ password.txt│
+   └─────┬───────┘
+
+3. PAM AUTHENTICATION
+   ┌─────────────┐
+   │ deviceflow.so│
+   │ initiates   │
+   │ OAuth2 flow │
+   └─────┬───────┘
+         │
+         ▼
+   ┌─────────────┐
+   │ Generate    │
+   │ QR Code &   │
+   │ Device Code │
+   └─────┬───────┘
+
+4. OKTA AUTHENTICATION
+   ┌─────────────┐
+   │ Browser     │
+   │ opens Okta  │
+   │ URL         │
+   └─────┬───────┘
+         │
+         ▼
+   ┌─────────────┐
+   │ User        │
+   │ authenticates│
+   │ with Okta   │
+   └─────┬───────┘
+
+5. TOKEN PROCESSING
+   ┌─────────────┐
+   │ Server      │
+   │ receives    │
+   │ JWT token   │
+   └─────┬───────┘
+         │
+         ▼
+   ┌─────────────┐
+   │ Decode JWT  │
+   │ extract     │
+   │ user info   │
+   └─────┬───────┘
+
+6. USER CREATION
+   ┌─────────────┐
+   │ Create user │
+   │ account     │
+   └─────┬───────┘
+         │
+         ▼
+   ┌─────────────┐
+   │ Assign sudo │
+   │ if in group │
+   └─────┬───────┘
+
+7. PASSWORD GENERATION
+   ┌─────────────┐
+   │ Generate    │
+   │ temp        │
+   │ password    │
+   └─────┬───────┘
+         │
+         ▼
+   ┌─────────────┐
+   │ Store in    │
+   │ password.txt│
+   └─────┬───────┘
+
+8. USER ACCESS
+   ┌─────────────┐
+   │ User gets   │
+   │ SSH access  │
+   │ with temp   │
+   │ password    │
+   └─────────────┘
+
+COMPONENT DETAILS
+=================
+
+CLIENT COMPONENTS:
+- sso-login.sh: Main client script
+- Email validation: syed.com domain only
+- Browser integration: Auto-launch for Okta
+- SSH client: Connects to server
+
+SERVER COMPONENTS:
+- SSH Server: Receives connections
+- PAM Stack: Authentication framework
+- deviceflow.c: Custom PAM module
+- pam-okta-create-user.sh: User management
+- users-clean-up.sh: Cleanup utility
+
+OKTA INTEGRATION:
+- OAuth2 Device Flow
+- JWT token generation
+- Group-based access control
+- Secure authentication
+
+SECURITY FEATURES:
+- JWT token validation
+- Secure file permissions (600)
+- Group-based sudo assignment
+- Temporary password generation
+- Automatic user cleanup
+
+FILE STRUCTURE:
+- ~/.sso/okta-email.txt: User email storage
+- /tmp/{username}: JWT token storage
+- /home/{username}/password.txt: Temp password
+- /usr/local/bin/: Management scripts
+- /lib/x86_64-linux-gnu/security/: PAM modules
