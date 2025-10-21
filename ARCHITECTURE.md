@@ -190,5 +190,4 @@ pam-sso-login/
 2. **Automatic User Provisioning**: Users created automatically on first login
 3. **Group-Based Access Control**: Sudo permissions based on Okta groups
 4. **Secure Token Handling**: JWT tokens with proper permissions
-5. **Mobile-Friendly**: QR code authentication for mobile devices
-6. **Centralized Management**: All authentication through Okta
+5. **Centralized Management**: All authentication through Okta
